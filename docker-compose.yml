@@ -1,0 +1,51 @@
+﻿services:
+  api-service:
+    image: api-service
+    container_name: api-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Prod
+      - ASPNETCORE_URLS=http://+:8000
+    ports:
+      - 8001:8000
+    volumes:
+      - api-service-uploads:/app/wwwroot/files
+    depends_on: 
+      - api-service-db
+      - redis-cache-service
+    networks: 
+      - service
+  api-service-db:
+    image: postgres
+    container_name: api-service-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456dev
+    ports:
+      - 5433:5432
+    volumes:
+      - api-service-db-data:/var/lib/postgresql/data
+    networks:
+      - service
+  redis-cache-service:
+    image: redis
+    container_name: redis-cache-service
+    restart: always
+    ports:
+      - 6380:6379
+    volumes:
+      - redis-cache-service-data:/data
+    networks:
+      - service
+networks:
+  service:
+    driver: bridge
+    
+volumes:
+  api-service-uploads:
+  api-service-db-data:
+  redis-cache-service-data:
